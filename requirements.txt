@@ -1,0 +1,9 @@
+python>=3.7
+cudatoolkit>=10.0
+cudnn>=7.6.5
+numpy>=1.18.1
+pytorch>=1.2.0
+scikit-learn>=0.22.1
+sentence-transformers>=0.2.6.2
+tqdm>=4.46.0
+transformers>=2.11.0
