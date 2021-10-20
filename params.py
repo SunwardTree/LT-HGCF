@@ -4,9 +4,9 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser()
     # Digital_Music, Beauty, Clothing_Shoes_and_Jewelry
-    parser.add_argument('--data', type=str, default="Clothing_Shoes_and_Jewelry",
+    parser.add_argument('--data', type=str, default="Digital_Music",
                         help='dataset: Digital_Music, Beauty, Clothing_Shoes_and_Jewelry')
-    parser.add_argument('--gpu_id', type=int, default=3,
+    parser.add_argument('--gpu_id', type=int, default=0,
                         help='Enables CUDA training. If use cpu, set -1.')
     parser.add_argument('--seed', type=int, default=2021, help='Random seed.')
     parser.add_argument('--epochs', type=int, default=2000,
