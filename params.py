@@ -52,5 +52,5 @@ def parse_args():
                         help='Number of R-GCN layers.')
     parser.add_argument('--load_model', type=int, default=0)
     parser.add_argument('--save_model', type=int, default=0)
-    parser.add_argument('--use_rgcn', type=int, default=0)  # 1
+    parser.add_argument('--use_rgcn', type=int, default=1)  # 1
     return parser.parse_args()
