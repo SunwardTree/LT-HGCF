@@ -12,15 +12,15 @@ If you use these codes, please cite our paper.
 
 @article{wang2021light,
 
-  title={A light heterogeneous graph collaborative filtering model using textual information},
+&nbsp; &nbsp; title={A light heterogeneous graph collaborative filtering model using textual information},
   
-  author={Wang, Chaoyang and Guo, Zhiqiang and Li, Guohui and Li, Jianjun and Pan, Peng and Liu, Ke},
+&nbsp; &nbsp; author={Wang, Chaoyang and Guo, Zhiqiang and Li, Guohui and Li, Jianjun and Pan, Peng and Liu, Ke},
   
-  journal={Knowledge-Based Systems},
+&nbsp; &nbsp; journal={Knowledge-Based Systems},
   
-  year={2021},
+&nbsp; &nbsp; year={2021},
   
-  publisher={Elsevier}
+&nbsp; &nbsp; publisher={Elsevier}
   
 }
 
