@@ -9,7 +9,7 @@ from utils import csr2tensor
 
 
 class RelationalGraphConvLayer(Module):
-    def __init__(self, input_dim, hidden_dim, rel_dict, device='cpu', dropout=[0, 0],
+    def __init__(self, hidden_dim, rel_dict, device='cpu', dropout=[0, 0],
                  active_fun='leaky_relu', use_weight=False, use_rgcn=True):
         super(RelationalGraphConvLayer, self).__init__()
         self.rel_dict = rel_dict
@@ -20,7 +20,7 @@ class RelationalGraphConvLayer(Module):
 
         if self.use_weight:
             # R-GCN weights
-            self.w = Parameter(torch.FloatTensor(num_rel, input_dim, hidden_dim))
+            self.w = Parameter(torch.FloatTensor(num_rel, hidden_dim, hidden_dim))
             if active_fun != 'none':
                 nn.init.xavier_uniform_(self.w.data, gain=nn.init.calculate_gain(active_fun))
             else:
@@ -73,7 +73,7 @@ class RelationalGraphConvLayer(Module):
 
 
 class RelationalGraphConvModel(nn.Module):
-    def __init__(self, input_size, out_size, hidden_size, rel_dict, num_layer,
+    def __init__(self, hidden_size, rel_dict, num_layer,
                  dropout, device='cpu', active_fun='leaky_relu', use_weight=False,
                  use_rgcn=True):
         super(RelationalGraphConvModel, self).__init__()
@@ -83,10 +83,10 @@ class RelationalGraphConvModel(nn.Module):
 
         for i in range(num_layer):
             if i == 0:
-                self.layers.append(RelationalGraphConvLayer(input_size, hidden_size, rel_dict,
+                self.layers.append(RelationalGraphConvLayer(hidden_size, hidden_size, rel_dict,
                                                             device, dropout, active_fun, use_weight, use_rgcn))
             else:
-                self.layers.append(RelationalGraphConvLayer(hidden_size, out_size, rel_dict,
+                self.layers.append(RelationalGraphConvLayer(hidden_size, hidden_size, rel_dict,
                                                             device, dropout, active_fun, use_weight, use_rgcn))
 
     def forward(self, norm_A, norm_adjs, embs, use_residual=False, use_layer_weight=False):
@@ -116,7 +116,7 @@ class RelationalGraphConvModel(nn.Module):
 
 
 class PredictNet(nn.Module):
-    def __init__(self, g_info, g_in_dim, g_out_dim, g_hidden_dim, p_hidden_dim, num_layer, dropout,
+    def __init__(self, g_info, g_hidden_dim, p_hidden_dim, num_layer, dropout,
                  use_dr_pre, use_des, use_rev, pre_v_dict, pred_method, device='cpu',
                  active_fun='leaky_relu', use_residual=False, use_layer_weight=False,
                  use_weight=False, use_rgcn=True):
@@ -144,19 +144,17 @@ class PredictNet(nn.Module):
             if use_rev:
                 self.init_embs.data[num_user + num_item + num_des:] = torch.FloatTensor(pre_v_dict['review'])
         else:
-            self.init_embs = nn.Parameter(torch.zeros(num_nodes, g_in_dim))
+            self.init_embs = nn.Parameter(torch.zeros(num_nodes, g_hidden_dim))
             nn.init.normal_(self.init_embs.data)
 
-        g_in_dim = self.init_embs.data.shape[1]
-        print('Graph input dim is reset as:', g_in_dim)
-        self.heteroGCN = RelationalGraphConvModel(input_size=g_in_dim, out_size=g_out_dim, hidden_size=g_hidden_dim,
+        g_hidden_dim = self.init_embs.data.shape[1]
+        print('Dim is reset as:', g_hidden_dim)
+        self.heteroGCN = RelationalGraphConvModel(hidden_size=g_hidden_dim,
                                                   rel_dict=rel_dict, num_layer=num_layer,
                                                   dropout=dropout, device=device,
                                                   active_fun=active_fun, use_weight=use_weight,
                                                   use_rgcn=use_rgcn)
         self.pred_method = pred_method
-        if not use_weight:
-            g_hidden_dim = g_in_dim
         if self.pred_method == 'mlp':
             self.predict_l_1 = nn.Linear(in_features=g_hidden_dim * 2, out_features=p_hidden_dim)
             self.predict_l_2 = nn.Linear(in_features=p_hidden_dim, out_features=p_hidden_dim)
