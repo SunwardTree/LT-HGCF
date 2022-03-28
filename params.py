@@ -46,6 +46,8 @@ def parse_args():
                         help='Number of hidden units.')
     parser.add_argument('--g_in_dim', type=int, default=128,
                         help='Number of graph input dim.')
+    parser.add_argument('--g_out_dim', type=int, default=64,
+                        help='Number of graph out dim.')
     parser.add_argument('--p_hidden_dim', type=int, default=128,  # 128
                         help='Number of hidden units of PredictNet.')
     parser.add_argument('--num_layer', type=int, default=4,  # 4

@@ -73,7 +73,7 @@ class RelationalGraphConvLayer(Module):
 
 
 class RelationalGraphConvModel(nn.Module):
-    def __init__(self, input_size, hidden_size, rel_dict, num_layer,
+    def __init__(self, input_size, out_size, hidden_size, rel_dict, num_layer,
                  dropout, device='cpu', active_fun='leaky_relu', use_weight=False,
                  use_rgcn=True):
         super(RelationalGraphConvModel, self).__init__()
@@ -86,7 +86,7 @@ class RelationalGraphConvModel(nn.Module):
                 self.layers.append(RelationalGraphConvLayer(input_size, hidden_size, rel_dict,
                                                             device, dropout, active_fun, use_weight, use_rgcn))
             else:
-                self.layers.append(RelationalGraphConvLayer(hidden_size, hidden_size, rel_dict,
+                self.layers.append(RelationalGraphConvLayer(hidden_size, out_size, rel_dict,
                                                             device, dropout, active_fun, use_weight, use_rgcn))
 
     def forward(self, norm_A, norm_adjs, embs, use_residual=False, use_layer_weight=False):
@@ -116,7 +116,7 @@ class RelationalGraphConvModel(nn.Module):
 
 
 class PredictNet(nn.Module):
-    def __init__(self, g_info, g_in_dim, g_hidden_dim, p_hidden_dim, num_layer, dropout,
+    def __init__(self, g_info, g_in_dim, g_out_dim, g_hidden_dim, p_hidden_dim, num_layer, dropout,
                  use_dr_pre, use_des, use_rev, pre_v_dict, pred_method, device='cpu',
                  active_fun='leaky_relu', use_residual=False, use_layer_weight=False,
                  use_weight=False, use_rgcn=True):
@@ -149,7 +149,7 @@ class PredictNet(nn.Module):
 
         g_in_dim = self.init_embs.data.shape[1]
         print('Graph input dim is reset as:', g_in_dim)
-        self.heteroGCN = RelationalGraphConvModel(input_size=g_in_dim, hidden_size=g_hidden_dim,
+        self.heteroGCN = RelationalGraphConvModel(input_size=g_in_dim, out_size=g_out_dim, hidden_size=g_hidden_dim,
                                                   rel_dict=rel_dict, num_layer=num_layer,
                                                   dropout=dropout, device=device,
                                                   active_fun=active_fun, use_weight=use_weight,

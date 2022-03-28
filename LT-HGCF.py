@@ -36,8 +36,8 @@ class RunProcess:
         self.norm_A = row_normalize(self.A)
         self.norm_adjs = row_normalize(self.all_adjs)
         # Create Model
-        self.model = PredictNet(g_info=self.graph_info, g_in_dim=self.args.g_in_dim, g_hidden_dim=self.args.hidden,
-                                p_hidden_dim=self.args.p_hidden_dim, num_layer=self.args.num_layer,
+        self.model = PredictNet(g_info=self.graph_info, g_in_dim=self.args.g_in_dim, g_out_dim=self.args.g_out_dim,
+                                g_hidden_dim=self.args.hidden, p_hidden_dim=self.args.p_hidden_dim, num_layer=self.args.num_layer,
                                 use_dr_pre=self.args.use_dr_pre, use_rev=self.args.use_rev, use_des=self.args.use_des,
                                 pre_v_dict=self.pre_vec_dict, dropout=eval(self.args.drop),
                                 pred_method=self.args.pred_method, device=device, active_fun=self.args.active_fun,
