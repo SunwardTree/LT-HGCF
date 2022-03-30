@@ -253,11 +253,11 @@ def load_data(data_name, device, emb_method='bert', self_loop=False):
             old_user2new_f.write(str(old_user2new))
 
         print('pos_uir_list', len(pos_uir_list))
-        train_p_uir_dict, test_uir_dict = get_train_test(pos_uir_list, p_ui_dic, num_item)
+        train_data, test_data = get_train_test(pos_uir_list, p_ui_dic, num_item)
         with open(data_root + 'train_data', 'w') as train_f:
-            train_f.write(str(train_p_uir_dict))
+            train_f.write(str(train_data))
         with open(data_root + 'test_data', 'w') as test_f:
-            test_f.write(str(test_uir_dict))
+            test_f.write(str(test_data))
     try:
         with open(data_root + 'graph.info', 'r') as info_f:
             g_info = eval(info_f.read())

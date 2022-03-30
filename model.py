@@ -21,10 +21,7 @@ class RelationalGraphConvLayer(Module):
         if self.use_weight:
             # R-GCN weights
             self.w = Parameter(torch.FloatTensor(num_rel, hidden_dim, hidden_dim))
-            if active_fun != 'none':
-                nn.init.xavier_uniform_(self.w.data, gain=nn.init.calculate_gain(active_fun))
-            else:
-                nn.init.xavier_uniform_(self.w.data)
+            nn.init.xavier_uniform_(self.w.data)
 
         net_drop = dropout[0]
         self.node_drop = dropout[1]
@@ -73,13 +70,14 @@ class RelationalGraphConvLayer(Module):
 
 
 class RelationalGraphConvModel(nn.Module):
-    def __init__(self, hidden_size, rel_dict, num_layer,
+    def __init__(self, init_embs, hidden_size, rel_dict, num_layer,
                  dropout, device='cpu', active_fun='leaky_relu', use_weight=False,
                  use_rgcn=True):
         super(RelationalGraphConvModel, self).__init__()
 
         self.layers = nn.ModuleList()
-        self.all_embs = None
+        self.all_embs = nn.Parameter(init_embs, requires_grad=True)
+        self.out_embs = init_embs
 
         for i in range(num_layer):
             if i == 0:
@@ -89,9 +87,10 @@ class RelationalGraphConvModel(nn.Module):
                 self.layers.append(RelationalGraphConvLayer(hidden_size, rel_dict,
                                                             device, dropout, active_fun, use_weight, use_rgcn))
 
-    def forward(self, norm_A, norm_adjs, embs, use_residual=False, use_layer_weight=False):
+    def forward(self, norm_A, norm_adjs, use_residual=False, use_layer_weight=False):
         one_embs = 0
         embs_list = []
+        embs = self.all_embs
         for i, layer in enumerate(self.layers):
             embs = layer(norm_A, norm_adjs, embs)  # GCN propagation
             # 将第一层的embs加上
@@ -103,16 +102,12 @@ class RelationalGraphConvModel(nn.Module):
                 embs_list.append(embs)
         if use_layer_weight:
             embs_tensor = torch.stack(embs_list, dim=1)
-            self.all_embs = torch.mean(embs_tensor, dim=1)
+            self.out_embs = torch.mean(embs_tensor, dim=1)
         else:
-            self.all_embs = embs
-        return self.all_embs
+            self.out_embs = embs
 
     def lookup_emb(self, emb_index):
-        if self.all_embs is not None:
-            return self.all_embs[emb_index]
-        else:
-            return False
+        return self.out_embs[emb_index]
 
 
 class PredictNet(nn.Module):
@@ -134,22 +129,22 @@ class PredictNet(nn.Module):
             self.active_fun = nn.LeakyReLU()
 
         if use_dr_pre:
-            self.init_embs = nn.Parameter(torch.zeros(num_nodes, pre_v_dict['review'].shape[1]))
+            init_embs = torch.zeros(num_nodes, pre_v_dict['review'].shape[1])
             num_user = g_info['n_user']
             num_item = g_info['n_item']
             num_des = g_info['n_des']
             if use_des:
-                self.init_embs.data[num_user + num_item: num_user + num_item + num_des] = \
+                init_embs[num_user + num_item: num_user + num_item + num_des] = \
                     torch.FloatTensor(pre_v_dict['description'])
             if use_rev:
-                self.init_embs.data[num_user + num_item + num_des:] = torch.FloatTensor(pre_v_dict['review'])
+                init_embs[num_user + num_item + num_des:] = torch.FloatTensor(pre_v_dict['review'])
         else:
-            self.init_embs = nn.Parameter(torch.zeros(num_nodes, g_hidden_dim))
-            nn.init.normal_(self.init_embs.data)
+            init_embs = torch.zeros(num_nodes, g_hidden_dim)
+            nn.init.normal_(init_embs)
 
-        g_hidden_dim = self.init_embs.data.shape[1]
+        g_hidden_dim = init_embs.shape[1]
         print('Dim is reset as:', g_hidden_dim)
-        self.heteroGCN = RelationalGraphConvModel(hidden_size=g_hidden_dim,
+        self.heteroGCN = RelationalGraphConvModel(init_embs=init_embs, hidden_size=g_hidden_dim,
                                                   rel_dict=rel_dict, num_layer=num_layer,
                                                   dropout=dropout, device=device,
                                                   active_fun=active_fun, use_weight=use_weight,
@@ -168,7 +163,7 @@ class PredictNet(nn.Module):
 
     def forward(self, norm_A, norm_adjs):
         # update emb
-        self.heteroGCN(norm_A, norm_adjs, self.init_embs, self.use_residual, self.use_layer_weight)
+        self.heteroGCN(norm_A, norm_adjs, self.use_residual, self.use_layer_weight)
 
     def predict(self, u_emb, i_emb, dropout=0.0):
         # predict part

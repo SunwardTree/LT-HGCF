@@ -13,6 +13,7 @@ str_dev = "cuda:" + str(args.gpu_id)
 device = torch.device(str_dev if (torch.cuda.is_available() and args.gpu_id >= 0) else "cpu")
 print('Device:', device)
 torch.manual_seed(args.seed)
+np.random.seed(args.seed)
 
 
 class RunProcess:
