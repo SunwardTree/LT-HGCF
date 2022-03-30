@@ -83,10 +83,10 @@ class RelationalGraphConvModel(nn.Module):
 
         for i in range(num_layer):
             if i == 0:
-                self.layers.append(RelationalGraphConvLayer(hidden_size, hidden_size, rel_dict,
+                self.layers.append(RelationalGraphConvLayer(hidden_size, rel_dict,
                                                             device, dropout, active_fun, use_weight, use_rgcn))
             else:
-                self.layers.append(RelationalGraphConvLayer(hidden_size, hidden_size, rel_dict,
+                self.layers.append(RelationalGraphConvLayer(hidden_size, rel_dict,
                                                             device, dropout, active_fun, use_weight, use_rgcn))
 
     def forward(self, norm_A, norm_adjs, embs, use_residual=False, use_layer_weight=False):

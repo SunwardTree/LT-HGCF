@@ -128,7 +128,7 @@ if __name__ == '__main__':
         os.makedirs('./result_log/')
     result_log = open('./result_log/' + args.data + '_HGCF'
                       + '--emb_method-' + args.emb_method + '--pred_method-' + args.pred_method
-                      + '--graph_in_dim-' + str(args.g_in_dim) + '--self_loop-' + str(args.self_loop)
+                      + '--hidden-' + str(args.hidden) + '--self_loop-' + str(args.self_loop)
                       + '--use_residual-' + str(args.use_residual) + '--n_layer-' + str(args.num_layer)
                       + '--use_des-' + str(args.use_des) + '--use_rev-' + str(args.use_rev)
                       + '--dr_pre_train-' + str(args.use_dr_pre) + '--use_weight-' + str(args.use_weight) + '--'
